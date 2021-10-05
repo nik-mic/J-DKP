@@ -3,35 +3,38 @@ import entities.ObjectScanner;
 import formats.Parsetree;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import subjects.HighSubject;
-import subjects.MediumSubject;
-import subjects.SimpleSubject;
-import subjects.Subject;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import subjects.*;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
 
 public class ObjectScannerTest {
 
     ObjectScanner scanner = new LiteralScanner();
-    Parsetree onePt = new Parsetree(Arrays.asList("Samy", "18"));
 
-    @Test
-    public void zeroDimUnparsing(){
-        Subject one = new SimpleSubject();
-        Assertions.assertEquals(onePt.getTree(), new Parsetree(scanner.scan(one)).getTree());
+    private static Stream<Arguments> scanningTest() {
+        return Stream.of(
+                Arguments.of(new SimpleSubject(), new Parsetree(Arrays.asList("Samy", "18")).getTree()),
+                Arguments.of(new MediumSubject(), new Parsetree(Arrays.asList(Arrays.asList("Samy", "18"), "Nele", "19")).getTree()),
+                Arguments.of(new HighSubject(), new Parsetree(Arrays.asList("Marie", Arrays.asList(Arrays.asList("Samy", "18"), "Nele", "19"), "21")).getTree()),
+                Arguments.of(new ParallelSubject(), new Parsetree(Arrays.asList(Arrays.asList("Samy", "18"), Arrays.asList("Samy", "18"))).getTree())
+        );
+    };
+
+    @ParameterizedTest
+    @MethodSource
+    public void scanningTest(Subject s, List<Object> pt){
+        Assertions.assertEquals(pt, scanner.scan(s));
     }
 
     @Test
-    public void oneDimUnparsing(){
-        Subject two = new MediumSubject();
-        Parsetree pt = new Parsetree(Arrays.asList(Arrays.asList("Samy", "18"), "Nele", "19"));
-        Assertions.assertEquals(pt.getTree(), new Parsetree(scanner.scan(two)).getTree());
-    }
-
-    @Test
-    public void twoDimUnparsing(){
-        Subject two = new HighSubject();
-        Parsetree pt = new Parsetree(Arrays.asList("Marie", Arrays.asList(Arrays.asList("Samy", "18"), "Nele", "19"), "21"));
-        Assertions.assertEquals(pt.getTree(), new Parsetree(scanner.scan(two)).getTree());
+    public void throwsAccessException(){
+        // TODO
+        // Assertions.assertThrows(IllegalAccessException.class, () -> scanner.scan(Arrays.asList(1, 2, 3)));
     }
 }

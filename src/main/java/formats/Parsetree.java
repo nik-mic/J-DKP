@@ -111,8 +111,8 @@ public class Parsetree implements DataFormat {
     }
 
     @Override
-    public Content getContent() {
-        return null;
+    public List<Object> getContent(){
+        return tree;
     }
 
     @Override
